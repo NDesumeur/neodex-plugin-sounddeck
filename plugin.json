@@ -1,0 +1,27 @@
+{
+  "id": "neodex.sounddeck",
+  "name": "SoundDeck",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Fabrique des bruitages rétro pour tes jeux : pièce, saut, laser, explosion, bonus, touché, clic ou porte, tirés au hasard d'un clic, puis réglés avec 5 formes d'onde et 14 curseurs (hauteur, glissando, enveloppe, punch, vibrato, arpège, filtre, écrasement). Une variante d'un clic, 12 pads à jouer au clavier, et l'export en WAV.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "sounddeck",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Outils",
+  "mobile": true,
+  "compatibility": [
+    "windows",
+    "android",
+    "linux"
+  ],
+  "syncMode": "fusion",
+  "syncInfo": "Le son en cours et les 12 pads.",
+  "system": false,
+  "dependencies": {},
+  "sdk": "2.1.0",
+  "permissions": [
+    "storage"
+  ]
+}
