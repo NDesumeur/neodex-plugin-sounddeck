@@ -1,9 +1,9 @@
 {
   "id": "neodex.sounddeck",
   "name": "SoundDeck",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NDesumeur",
-  "description": "Fabrique des bruitages rétro pour tes jeux : pièce, saut, laser, explosion, bonus, touché, clic ou porte, tirés au hasard d'un clic, puis réglés avec 5 formes d'onde et 14 curseurs (hauteur, glissando, enveloppe, punch, vibrato, arpège, filtre, écrasement). Une variante d'un clic, 12 pads à jouer au clavier, et l'export en WAV.",
+  "description": "Fabrique des bruitages rétro pour tes jeux : 16 familles à tirer au hasard (pièce, saut, laser, explosion, tir, magie, moteur…), 6 formes d'onde et 23 réglages verrouillables (filtre résonant, écho, distorsion, trémolo…), historique, mélange de plusieurs sons et 5 jingles, 12 pads, clavier, export WAV 44/22/11 kHz en 16 ou 8 bits.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "sounddeck",

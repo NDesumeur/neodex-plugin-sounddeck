@@ -1,29 +1,41 @@
 # SoundDeck
 
-Make retro sound effects for your games, in a few clicks.
+Make retro sound effects for your games, in a few clicks: 16 families, 23 settings, mixes and jingles.
 
 *Version française : [README.md](README.md)*
 
 ![SoundDeck](screenshots/1.jpg)
 
-## Roll a random sound
+## Pick a random sound
 
-8 families: **coin**, **jump**, **laser**, **explosion**, **power-up**, **hit**, **click** and **door**. Each click rolls a new sound of the family and plays it. **🎲 Variation** changes the current sound's settings a little, to find the right version.
+16 families: **coin**, **jump**, **laser**, **explosion**, **power-up**, **hit**, **blip**, **door**, **shot**, **step**, **magic**, **alarm**, **engine**, **menu**, **ouch** and **rise**. Each click draws a new sound from the family and plays it. **🎲 Variant** slightly changes the current sound, **🎲 Full random** draws every setting.
 
-## Tuning
+## Tune
 
-- 5 waveforms: square, sawtooth, sine, triangle, noise.
-- 14 sliders: pitch, slide (pitch going up or down), square width, attack, sustain, decay, punch, vibrato and its speed, arpeggio (a pitch jump at a given time), filter, crush (a more "8-bit" sound) and volume.
-- The waveform is drawn live; a click on it (or **Space**) plays the sound.
+- 6 waveforms: square, sawtooth, sine, triangle, noise and metal noise (the NES "short" noise).
+- 23 sliders in 5 sections:
+  - **Pitch**: pitch, slide, repeat (the slide starting again, for sirens and rises), square width and moving width.
+  - **Envelope**: attack, sustain, decay, punch.
+  - **Modulation**: vibrato, arpeggio (a pitch jump at a given time), tremolo, and their speeds.
+  - **Filters**: filter with resonance, high-pass.
+  - **Effects**: distortion, crush (more "8-bit" sound), echo and its delay, volume.
+- **🔒** next to a slider (or the waveform): lock it. Variant, Random and the families no longer touch it.
+- The waveform is drawn live (the echo in purple), with a cursor while playing; click it (or **Space**) to play the sound.
+- **✎** renames the sound, **↶ ↷** (or **Ctrl+Z / Ctrl+Y**) undo and redo. The **history** keeps the last 12 sounds drawn.
+- **Keyboard**: **A S D F G H J K** (and **W E T Y U** for sharps) play the sound as notes, over one octave.
+
+## Mix
+
+Stack up to 12 sounds, each with its start time and volume: **+ Current sound** adds it at the end. **Jingles** gives five ready-made ones (victory, defeat, next level, bonus, game over), to edit. **▶ Mix** to listen, **WAV** to export it, and right click on an empty pad to store it there.
 
 ## Pads
 
-12 pads to store your sounds: click an empty pad to store the current sound, click a full pad to play it, right click to take it back or clear it. Keys **1** to **9**, **0**, **-** and **=** play the pads, like a drum machine.
+12 pads to store your sounds (♪) and mixes (♫): click an empty pad to store the current sound, click a full pad to play it, right click to take it back, rename it or clear it. Keys **1** to **9**, **0**, **-** and **=** play the pads, like a drum machine. **Export the bank** and **Open a bank**: the 12 pads in one file. **All as WAV**: one file per pad.
 
 ## Export
 
-**Export WAV**: the current sound, 44.1 kHz mono, ready for a game engine.
+**Export WAV**: the current sound, mono, at 44.1, 22 or 11 kHz and 16 or 8 bits, ready for a game engine.
 
 ## Data
 
-The current sound and the pads are kept in the plugin folder. Permission: `storage` only.
+The current sound, the locks, the mix and the pads are kept in the plugin folder. Permission: `storage` only.
