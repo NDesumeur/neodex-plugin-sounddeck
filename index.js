@@ -23,6 +23,7 @@ const CSS = `
 .sdPad b{font:16px monospace;color:#fff}
 .sdPad.full{border-color:var(--magenta)}
 .sdPad.mix{border-color:#ffd34f}
+.sdLib{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}.sdLibRow{display:flex;gap:6px;align-items:center}.sdLibRow>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sdPad.on{background:rgba(var(--pkr),.4)}
 .sdPad .k{position:absolute;left:3px;top:1px;font:10px monospace;color:var(--muted)}
 .sdHist{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
@@ -100,6 +101,22 @@ function renderMix(layers) {
   let pk = 0; for (const v of out) pk = Math.max(pk, Math.abs(v)); if (pk > .99) for (let i = 0; i < n; i++) out[i] *= .99 / pk;
   return out;
 }
+// un ZIP sans compression (les WAV se compressent mal) : en-têtes locaux, puis le répertoire central
+function zip(files) {
+  const T = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = b => { let c = ~0; for (const x of b) c = T[(c ^ x) & 255] ^ (c >>> 8); return ~c >>> 0; };
+  const parts = [], dir = []; let off = 0;
+  for (const {name, bytes} of files) {
+    const nm = new TextEncoder().encode(name), b = new Uint8Array(bytes), c = crc(b), h = new DataView(new ArrayBuffer(30));
+    [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x800, 2], [14, c, 4], [18, b.length, 4], [22, b.length, 4], [26, nm.length, 2]].forEach(([o, v, n]) => n === 4 ? h.setUint32(o, v, true) : h.setUint16(o, v, true));
+    const d = new DataView(new ArrayBuffer(46));
+    [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x800, 2], [16, c, 4], [20, b.length, 4], [24, b.length, 4], [28, nm.length, 2], [42, off, 4]].forEach(([o, v, n]) => n === 4 ? d.setUint32(o, v, true) : d.setUint16(o, v, true));
+    parts.push(new Uint8Array(h.buffer), nm, b); dir.push(new Uint8Array(d.buffer), nm); off += 30 + nm.length + b.length;
+  }
+  const size = dir.reduce((a, x) => a + x.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, size, true); e.setUint32(16, off, true);
+  const all = [...parts, ...dir, new Uint8Array(e.buffer)], out = new Uint8Array(all.reduce((a, x) => a + x.length, 0)); let p = 0; for (const x of all) { out.set(x, p); p += x.length; } return out;
+}
 function toWav(samples, sr = SR, bits = 16) {
   const k = SR / sr, n = Math.floor(samples.length / k), by = bits / 8, d = new DataView(new ArrayBuffer(44 + n * by)), w = (o, s) => [...s].forEach((c, i) => d.setUint8(o + i, c.charCodeAt(0)));
   w(0, 'RIFF'); d.setUint32(4, 36 + n * by, true); w(8, 'WAVE'); w(12, 'fmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true); d.setUint32(24, sr, true); d.setUint32(28, sr * by, true); d.setUint16(32, by, true); d.setUint16(34, bits, true); w(36, 'data'); d.setUint32(40, n * by, true);
@@ -125,8 +142,8 @@ export default async function (ctx) {
     && toWav(new Float32Array(10)).length === 64 && toWav(new Float32Array(40), 11025, 8).length === 54 && renderMix(jingle('Victoire')).length > SR * .7, 'sounddeck : synthé');
   let data = null; try { data = await ctx.folder.read('sounddeck'); } catch {}
   let cur = data?.cur ? {...BASE, ...data.cur} : {...BASE, ...FAMILIES.coin[1]()}, pads = data?.pads || Array(12).fill(null), curName = data?.curName || 'Pièce';
-  let locks = data?.locks || {}, mix = data?.mix || [], hist = [], undoS = [], redoS = [], expSr = data?.expSr || SR, expBits = data?.expBits || 16;
-  let saveT = 0; const save = () => { clearTimeout(saveT); saveT = setTimeout(() => ctx.folder.write('sounddeck', {cur, pads, curName, locks, mix, expSr, expBits}).catch(() => {}), 400); };
+  let lib = data?.lib || [], libQ = '', locks = data?.locks || {}, mix = data?.mix || [], hist = [], undoS = [], redoS = [], expSr = data?.expSr || SR, expBits = data?.expBits || 16;
+  let saveT = 0; const save = () => { clearTimeout(saveT); saveT = setTimeout(() => ctx.folder.write('sounddeck', {cur, pads, curName, locks, mix, expSr, expBits, lib}).catch(() => {}), 400); };
   const remember = () => { undoS.push(JSON.stringify({cur, curName})); if (undoS.length > 60) undoS.shift(); redoS.length = 0; };
   const back = (from, to) => { if (!from.length) return; to.push(JSON.stringify({cur, curName})); ({cur, curName} = JSON.parse(from.pop())); save(); full(); play(); };
   const keep = () => { hist.unshift({name: curName, p: {...cur}}); hist = hist.slice(0, 12); drawHist(); };
@@ -142,10 +159,10 @@ export default async function (ctx) {
   left.append(el('span', 'label', 'Tirer un son au hasard'), fam, el('div', 'sdRow'), el('span', 'label', 'Réglages'), waveRow, sliders);
   left.children[2].append(btn('🎲 Hasard total', randAll, 'Tous les réglages au hasard, sauf ceux verrouillés 🔒'), el('span', 'hint', '🔒 : un réglage verrouillé ne bouge plus avec Variante, Hasard ni les familles.'));
   const cv = el('canvas', 'sdWave'), act = el('div', 'sdRow'), padsBox = el('div', 'sdPads'), nameL = el('div', 'hint'), histBox = el('div', 'sdHist'), expRow = el('div', 'sdRow');
-  const mixC = el('canvas', 'sdMixC'), mixList = el('div'), mixAct = el('div', 'sdRow'), padAct = el('div', 'sdRow');
+  const mixC = el('canvas', 'sdMixC'), mixList = el('div'), mixAct = el('div', 'sdRow'), padAct = el('div', 'sdRow'), libAct = el('div', 'sdRow'), libList = el('div', 'sdLib');
   cv.id = 'sd_wave'; cv.title = 'Clic : jouer'; nameL.id = 'sd_name';
   right.append(el('span', 'label', 'Le son'), nameL, cv, act, expRow, el('span', 'label', 'Historique'), histBox, el('span', 'label', 'Mélange'), mixC, mixList, mixAct,
-    el('span', 'label', 'Pads'), padsBox, padAct,
+    el('span', 'label', 'Pads'), padsBox, padAct, el('span', 'label', 'Bibliothèque'), libAct, libList,
     el('p', 'sdHelp', 'Clic sur un pad vide : y ranger le son. Clic sur un pad plein : le jouer. Clic droit : le reprendre pour le modifier, le renommer ou le vider. Touches 1 à 9, 0, - et = : jouer les pads. Touches A S D F G H J K (et W E T Y U pour les dièses) : jouer le son en notes. Espace : jouer · Ctrl+Z / Ctrl+Y : annuler / refaire.'));
   const applyFam = (n, f) => { remember(); const p = {...BASE, ...f()}; for (const k in locks) if (locks[k]) p[k] = cur[k]; cur = p; curName = n; keep(); save(); full(); play(); };
   for (const [k, [n, f]] of Object.entries(FAMILIES)) { const b = btn(n, () => applyFam(n, f)); b.dataset.fam = k; fam.append(b); }
@@ -186,7 +203,7 @@ export default async function (ctx) {
   const mutate = () => { remember(); for (const [k, , mn, mx] of PARAMS) { if (k === 'volume' || locks[k]) continue; if (Math.random() < .5) { const span = (mx - mn) * .08; cur[k] = Math.max(mn, Math.min(mx, cur[k] + (Math.random() * 2 - 1) * span)); } }
     if (!locks.freq) cur.freq = Math.max(40, cur.freq * (1 + (Math.random() - .5) * .25)); curName = curName.replace(/ \*$/, '') + ' *'; keep(); save(); full(); play(); };
   const safe = s => (s.replace(/[^\wÀ-ÿ-]+/g, '-').replace(/^-|-$/g, '') || 'son');
-  const dl = (bytes, name) => { const a = el('a'); a.href = URL.createObjectURL(new Blob([bytes], {type: name.endsWith('.json') ? 'application/json' : 'audio/wav'})); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+  const dl = (bytes, name) => { const a = el('a'); a.href = URL.createObjectURL(new Blob([bytes], {type: name.endsWith('.json') ? 'application/json' : name.endsWith('.zip') ? 'application/zip' : 'audio/wav'})); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
   const playB = btn('▶ Jouer', () => play()); playB.classList.add('main'); playB.id = 'sd_play';
   act.append(playB, btn('🎲 Variante', mutate, 'Changer un peu les réglages (sauf ceux verrouillés)'), btn('⟲ Neutre', () => { remember(); cur = {...BASE}; curName = 'Neutre'; save(); full(); }),
     btn('✎', async () => { const n = await ctx.host.ask?.('Nom du son', curName); if (n) { curName = String(n).slice(0, 30); save(); drawWave(); } }, 'Renommer'), btn('↶', () => back(undoS, redoS), 'Annuler'), btn('↷', () => back(redoS, undoS), 'Refaire'));
@@ -236,6 +253,21 @@ export default async function (ctx) {
   bankIn.onchange = async () => { const f = bankIn.files[0]; bankIn.value = ''; if (!f) return; try { const j = JSON.parse(await f.text()); if (!Array.isArray(j.pads)) throw 0; pads = Array(12).fill(null).map((_, i) => j.pads[i] || null); save(); drawPads(); toast('Banque ouverte : ' + f.name); } catch { toast('Ce fichier n\'est pas une banque SoundDeck'); } };
   padAct.append(btn('Exporter la banque', () => dl(JSON.stringify({pads}), 'banque.sounddeck.json'), 'Les 12 pads dans un fichier'), btn('Ouvrir une banque', () => bankIn.click()), bankIn,
     btn('Tous en WAV', async () => { const full = pads.map((p, i) => [p, i]).filter(([p]) => p); if (!full.length) return toast('Aucun pad rempli'); for (const [p, i] of full) { dl(toWav(padSound(p), expSr, expBits), (i + 1) + '-' + safe(p.name) + '.wav'); await new Promise(r => setTimeout(r, 250)); } toast(full.length + ' fichiers WAV'); }, 'Un fichier WAV par pad rempli'));
+  // ---------- la bibliothèque : tous tes bruitages rangés, avec un nom, cherchables ----------
+  function drawLib() {
+    const q = libQ.trim().toLowerCase(), list = lib.map((x, i) => [x, i]).filter(([x]) => !q || x.name.toLowerCase().includes(q));
+    libList.replaceChildren(...list.map(([x, i]) => { const r = el('div', 'sdLibRow'), n = el('span', '', x.name); n.translate = false;
+      r.append(btn('▶', () => playBuf(synth(x.p)), 'Jouer'), n, btn('Reprendre', () => { remember(); cur = {...BASE, ...x.p}; curName = x.name; save(); full(); play(); }, 'Le reprendre pour le modifier'),
+        btn('✎', async () => { const v = await ctx.host.ask?.('Nom du bruitage', x.name); if (v) { x.name = String(v).slice(0, 30); save(); drawLib(); } }, 'Renommer'), btn('✕', () => { lib.splice(i, 1); save(); drawLib(); }, 'Retirer de la bibliothèque'));
+      return r; }));
+    if (!lib.length) libList.append(el('p', 'hint', 'Range ici les sons que tu gardes : autant que tu veux, avec leur nom.'));
+    else if (!list.length) libList.append(el('p', 'hint', 'Aucun son ne porte ce nom.'));
+  }
+  const libSearch = el('input', 'f'); libSearch.placeholder = 'Chercher…'; libSearch.oninput = () => { libQ = libSearch.value; drawLib(); };
+  libAct.append(btn('+ Ranger le son', async () => { const n = await ctx.host.ask?.('Nom du bruitage', curName); if (n === null || n === '') return; lib.unshift({name: String(n || curName).slice(0, 30), p: {...cur}}); save(); drawLib(); toast('Rangé dans la bibliothèque (' + lib.length + ')'); }, 'Garder le son actuel'),
+    libSearch, btn('Tout en ZIP', () => { if (!lib.length) return toast('La bibliothèque est vide'); const used = {};
+      const files = lib.map(x => { let nm = safe(x.name) || 'son'; used[nm] = (used[nm] || 0) + 1; if (used[nm] > 1) nm += '-' + used[nm]; return {name: nm + '.wav', bytes: toWav(synth(x.p), expSr, expBits)}; });
+      dl(zip(files), 'bruitages.zip'); toast(files.length + ' bruitages dans le ZIP'); }, 'Chaque son en WAV, tous dans un fichier ZIP'));
   const flash = d => { d.classList.add('on'); setTimeout(() => d.classList.remove('on'), 150); };
   const PIANO = {a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12};
   const onKey = e => { if (!view.isConnected) { document.removeEventListener('keydown', onKey); return; } if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) && document.activeElement.type !== 'range') return;
@@ -246,6 +278,6 @@ export default async function (ctx) {
   document.addEventListener('keydown', onKey);
   ctx.onClose?.(() => { document.removeEventListener('keydown', onKey); cancelAnimationFrame(raf); ac?.close(); });
   function full() { drawSliders(); drawWave(); }
-  view.__sd = {get cur() { return cur; }, get mix() { return mix; }, synth, renderMix, toWav, jingle, locks, mutate, back: () => back(undoS, redoS)};
-  full(); drawPads(); drawHist(); drawMix();
+  view.__sd = {get cur() { return cur; }, get mix() { return mix; }, get lib() { return lib; }, zip, drawLib: () => drawLib(), synth, renderMix, toWav, jingle, locks, mutate, back: () => back(undoS, redoS)};
+  full(); drawPads(); drawHist(); drawMix(); drawLib();
 }

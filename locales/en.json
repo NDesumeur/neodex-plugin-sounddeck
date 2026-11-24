@@ -123,5 +123,22 @@
  "Aucun pad rempli": "No pad filled",
  "Un fichier WAV par pad rempli": "One WAV file per filled pad",
  "explosion, réglage, verrou, annuler, effets, jingle de": "explosion, setting, lock, undo, effects, jingle of",
- "s, WAV 8 bits, pad et clavier ok": "s, 8-bit WAV, pad and keyboard ok"
+ "s, WAV 8 bits, pad et clavier ok": "s, 8-bit WAV, pad and keyboard ok",
+ "Bibliothèque": "Library",
+ "Jouer": "Play",
+ "Reprendre": "Load",
+ "Le reprendre pour le modifier": "Load it to edit",
+ "Nom du bruitage": "Sound name",
+ "Retirer de la bibliothèque": "Remove from the library",
+ "Range ici les sons que tu gardes : autant que tu veux, avec leur nom.": "Keep your sounds here: as many as you like, with their names.",
+ "Aucun son ne porte ce nom.": "No sound has that name.",
+ "Chercher…": "Search…",
+ "+ Ranger le son": "+ Keep this sound",
+ "Rangé dans la bibliothèque (": "Saved to the library (",
+ "Garder le son actuel": "Keep the current sound",
+ "Tout en ZIP": "All as ZIP",
+ "La bibliothèque est vide": "The library is empty",
+ "bruitages dans le ZIP": "sounds in the ZIP",
+ "Chaque son en WAV, tous dans un fichier ZIP": "Each sound as a WAV, all in one ZIP file",
+ "bibliothèque :": "library:"
 }

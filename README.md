@@ -6,6 +6,10 @@ Fabrique des bruitages rétro pour tes jeux, en quelques clics : 16 familles, 23
 
 ![SoundDeck](screenshots/1.jpg)
 
+## La bibliothèque de bruitages (nouveau en 1.2.0)
+
+Range autant de sons que tu veux avec leur nom, cherche-les, et exporte-les tous en WAV dans un ZIP.
+
 ## Tirer un son au hasard
 
 16 familles : **pièce**, **saut**, **laser**, **explosion**, **bonus**, **touché**, **clic**, **porte**, **tir**, **pas**, **magie**, **alarme**, **moteur**, **menu**, **aïe** et **montée**. Chaque clic tire un nouveau son de la famille et le joue. **🎲 Variante** change un peu les réglages du son en cours, **🎲 Hasard total** tire tous les réglages.
@@ -31,6 +35,10 @@ Empile jusqu'à 12 sons, chacun avec son moment de départ et son volume : **+ S
 ## Les pads
 
 12 pads pour ranger tes sons (♪) et tes mélanges (♫) : clic sur un pad vide pour y ranger le son en cours, clic sur un pad plein pour le jouer, clic droit pour le reprendre, le renommer ou le vider. Les touches **1** à **9**, **0**, **-** et **=** jouent les pads, comme une boîte à rythmes. **Exporter la banque** et **Ouvrir une banque** : les 12 pads dans un fichier. **Tous en WAV** : un fichier par pad.
+
+## Bibliothèque
+
+**+ Ranger le son** garde le son actuel avec un nom, sans limite (en plus des 12 pads). Une case cherche par nom ; chaque son se joue, se reprend pour le modifier, se renomme ou se retire. **Tout en ZIP** exporte chaque son en WAV (au format choisi), tous dans un seul fichier ZIP.
 
 ## Exporter
 

@@ -23,5 +23,8 @@ module.exports = async ({ pj, sleep }) => {
   await pj(`document.querySelector('[data-pad="0"]').click(), 0`); await sleep(100);
   if (!await pj(`document.querySelector('[data-pad="0"]').classList.contains('full')`)) throw new Error('pad vide');
   await pj(`document.dispatchEvent(new KeyboardEvent('keydown', {key: '1'})), document.dispatchEvent(new KeyboardEvent('keydown', {key: 'g'})), 0`); await sleep(300);
-  return 'explosion, réglage, verrou, annuler, effets, jingle de ' + (r.mix / 44100).toFixed(2) + ' s, WAV 8 bits, pad et clavier ok';
+  // la bibliothèque : trois sons rangés, la recherche, et le ZIP (signature, nombre de fichiers, données intactes)
+  const lb = await pj("(() => { const v = document.querySelector('.sdLib').closest('[class]').ownerDocument.querySelector('*'), sd = [...document.querySelectorAll('*')].find(e => e.__sd).__sd; sd.lib.length = 0; sd.lib.push({name: 'Laser bleu', p: {...sd.cur}}, {name: 'Pièce', p: {...sd.cur}}, {name: 'Saut', p: {...sd.cur}}); sd.drawLib(); const all = document.querySelectorAll('.sdLibRow').length; const q = document.querySelector('.sdLib').previousElementSibling.querySelector('input'); q.value = 'las'; q.dispatchEvent(new Event('input')); const one = document.querySelectorAll('.sdLibRow').length; q.value = ''; q.dispatchEvent(new Event('input')); const z = sd.zip([{name: 'a.wav', bytes: new Uint8Array([1, 2, 3])}, {name: 'b.wav', bytes: new Uint8Array([4, 5])}]), dv = new DataView(z.buffer); return {all, one, sig: dv.getUint32(0, true) === 0x04034b50, n: dv.getUint16(z.length - 12, true), data: [...z.slice(35, 38)].join()}; })()");
+  if (lb.all !== 3 || lb.one !== 1 || !lb.sig || lb.n !== 2 || lb.data !== '1,2,3') throw new Error('bibliothèque : ' + JSON.stringify(lb));
+  return 'bibliothèque (recherche, ZIP), explosion, réglage, verrou, annuler, effets, jingle de ' + (r.mix / 44100).toFixed(2) + ' s, WAV 8 bits, pad et clavier ok';
 };

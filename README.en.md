@@ -6,6 +6,10 @@ Make retro sound effects for your games, in a few clicks: 16 families, 23 settin
 
 ![SoundDeck](screenshots/1.jpg)
 
+## The sound library (new in 1.2.0)
+
+Keep as many sounds as you like with their names, search them, and export them all as WAVs in a ZIP.
+
 ## Pick a random sound
 
 16 families: **coin**, **jump**, **laser**, **explosion**, **power-up**, **hit**, **blip**, **door**, **shot**, **step**, **magic**, **alarm**, **engine**, **menu**, **ouch** and **rise**. Each click draws a new sound from the family and plays it. **🎲 Variant** slightly changes the current sound, **🎲 Full random** draws every setting.
@@ -31,6 +35,10 @@ Stack up to 12 sounds, each with its start time and volume: **+ Current sound** 
 ## Pads
 
 12 pads to store your sounds (♪) and mixes (♫): click an empty pad to store the current sound, click a full pad to play it, right click to take it back, rename it or clear it. Keys **1** to **9**, **0**, **-** and **=** play the pads, like a drum machine. **Export the bank** and **Open a bank**: the 12 pads in one file. **All as WAV**: one file per pad.
+
+## Library
+
+**+ Keep this sound** saves the current sound with a name, with no limit (on top of the 12 pads). A box searches by name; each sound can be played, loaded to edit, renamed or removed. **All as ZIP** exports each sound as a WAV (in the chosen format), all in one ZIP file.
 
 ## Export
 
