@@ -1,9 +1,9 @@
 {
   "pluginId": "neodex.sounddeck",
   "repo": "NDesumeur/neodex-plugin-sounddeck",
-  "version": "1.1.0",
-  "sha256": "97cea40950afbfc512dee8a70f371414570aa7670f6304ebdf2c14bfe7605a59",
-  "approvedAt": "2026-11-12T17:01:01.325Z",
+  "version": "1.2.0",
+  "sha256": "8fa6242603d0e614822f2c603563931de4ea6bc66bb1140c746581979b8905c7",
+  "approvedAt": "2026-11-24T15:56:19.641Z",
   "neobase": ">=4.0.0",
-  "signature": "dFDGw98pWerjEg0/MQzxFCCR861XGxNOdiVaXGzFRwtbpI+R+K752vgIdEDJMcxJDnOAfHdV4rYRC8IXhTX5AQ=="
+  "signature": "5QmTvwvjuxebyz2J3helw8Sdfid5sfwtPoSweX0YHZUNxWTBvPsOYPSrtW0O1bqfoP+awIQD3kFnJl7U+d90Dg=="
 }
